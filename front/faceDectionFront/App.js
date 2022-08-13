@@ -1,12 +1,12 @@
-import React, {useState, Platfrom} from 'react';
-import {Platform, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
-import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
+import React, {useState} from 'react';
+import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import {launchCamera} from 'react-native-image-picker';
 import axios from 'axios';
+import _ from 'lodash';
 
 const App = () => {
-  const [photo, setPhoto] = useState();
-
-  const createFormData = () => {
+  const [predictResult, setPredictResult] = useState('');
+  const createFormData = photo => {
     console.log(photo);
     const formData = new FormData();
 
@@ -18,50 +18,66 @@ const App = () => {
     return formData;
   };
 
-  const handleUploadPhoto = () => {
-    const fileData = createFormData();
+  const handleUploadPhoto = photo => {
+    const fileData = createFormData(photo);
     console.log(fileData);
-    axios
-      .post('http://192.168.35.91:8080/', {body: JSON.stringify(fileData)})
-      .then(() => {
-        console.log('success');
+    fetch('http://172.30.113.154:8080', {
+      method: 'POST',
+      body: fileData,
+      headers: {'content-type': 'multipart/form-data'},
+    })
+      .then((response) => response.json())
+      .then((data)=>{
+        setPredictResult(data.result);
       })
-      .catch(e => console.log(e));
+      .catch(e => {
+        console.error(e);
+      });
   };
 
   const runCamera = async () => {
     const result = await launchCamera({cameraType: 'front'});
-    setPhoto(result.assets[0]);
-
-    handleUploadPhoto();
+    handleUploadPhoto(result.assets[0]);
   };
 
   return (
     <View style={styles.layout}>
-      <Text>main page2233</Text>
       <TouchableOpacity
         style={styles.captureButton}
         onPress={() => {
           runCamera();
         }}>
-        <Text>Capture</Text>
+        <Text style={{borderWidth:1, paddingVertical:20, paddingHorizontal:40, borderRadius: 15, backgroundColor:'white', fontWeight:'bold', color:'black'}}>📷 촬영</Text>
       </TouchableOpacity>
+      {
+        _.isEmpty(!predictResult) 
+        ? <PredictResultComponent resultText={predictResult} />
+        : null
+      }
     </View>
   );
 };
+
+const PredictResultComponent = ({resultText}) => {
+  return (
+    <View style={{flex: 3 ,  alignItems: 'center'}}>
+      <Text>{resultText}</Text>
+    </View>
+  )
+}
 
 const styles = StyleSheet.create({
   layout: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: '#aaffaa'
   },
   captureButton: {
+    flex:7,
+    justifyContent:'center',
+    alignItems:'center',
     marginTop: 50,
-    borderWidth: 3,
-    borderRadius: 15,
-    paddingVertical: 20,
-    paddingHorizontal: 50,
   },
 });
 
