@@ -10,6 +10,7 @@ CORS(app)
 @app.route('/',methods=['POST'])
 def hello_world():
     file = request.files.get('photo')
+    crop = request.form.get('crop')
     target = os.path.join(app.config['UPLOAD_FOLDER'], 'test')
     if not os.path.isdir(target):
         os.mkdir(target)
@@ -17,8 +18,8 @@ def hello_world():
     destination = "/".join([target, filename])
     file.save(destination)
 
-    return {"result":predictCrop(filename)}
+    return {"result":predictCrop(filename, crop)}
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port= '8080')
+    app.run(host='0.0.0.0', port= '5000')
 

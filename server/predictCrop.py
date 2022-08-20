@@ -4,6 +4,7 @@ import tensorflow
 import numpy as np
 from keras.utils import load_img, img_to_array
 import matplotlib.pyplot as plt
+import os
 
 plantType = {
     'Strawberry' : "딸기" ,
@@ -13,31 +14,17 @@ plantType = {
 } 
 
 
-def predictCrop(imgFileName):
-    # if plantType == plantType['Strawberry']:
-    #     model = tensorflow.keras.models.load_model('/Users/jihye/croptest/face-detection/server/딸기흰가루병mnet2.h5')
-    # elif plantType == plantType['WaterMelon']:
-    #     model = tensorflow.keras.models.load_model('/Users/jihye/croptest/face-detection/server/딸기흰가루병mnet2.h5')
-    # elif plantType == plantType['KoreanMelon']:
-    #     model = tensorflow.keras.models.load_model('/Users/jihye/croptest/face-detection/server/딸기흰가루병mnet2.h5')
-    #     # model2 = tensorflow.keras.models.load_model('/Users/jihye/croptest/face-detection/server/딸기흰가루병mnet2.h5')
-    #     # 참외의 경우에는 1: 흰가루 병인지 2: 노균병인 두번 예측을 한다음에 결과가 높은 걸 리턴 둘다 0.5미만인 경우는 병이아니라는것을 리턴
-    #     # 참외는 일단 노균병만 체크해보는거로 하고 차후에 개선을 적용한다
-    # elif plantType == plantType['Grape']:
-    #     model = tensorflow.keras.models.load_model('/Users/jihye/croptest/face-detection/server/딸기흰가루병mnet2.h5')
+def predictCrop(imgFileName, crop):
   model1 = tensorflow.keras.models.load_model('/Users/jihye/croptest/face-detection/server/files/딸기흰가루병mnet2.h5')
   model2 = tensorflow.keras.models.load_model('/Users/jihye/croptest/face-detection/server/files/수박흰가루병mnet2.h5')
   model3 = tensorflow.keras.models.load_model('/Users/jihye/croptest/face-detection/server/files/참외노균병mnet2.h5')
   model4 = tensorflow.keras.models.load_model('/Users/jihye/croptest/face-detection/server/files/참외흰가루병mnet2.h5')
-  # 참외의 경우에는 1: 흰가루 병인지 2: 노균병인 두번 예측을 한다음에 결과가 높은 걸 리턴 둘다 0.5미만인 경우는 병이아니라는것을 리턴
-  # 참외는 일단 노균병만 체크해보는거로 하고 차후에 개선을 적용한다
   model5 = tensorflow.keras.models.load_model('/Users/jihye/croptest/face-detection/server/files/포도노균병mnet2.h5')
   model6 = tensorflow.keras.models.load_model('/Users/jihye/croptest/face-detection/server/files/고추마일드모틀바이러스병mnet2.h5')
   model7 = tensorflow.keras.models.load_model('/Users/jihye/croptest/face-detection/server/files/참외_1000_CNN_50.h5')
-  models =[{"딸기흰가루병": model1}, {"수박흰가루병" :model2}, {"참외노균병" :model3}, {"참외흰가루병" :model4}, {"포도노균병" :model5}]
 
-  #sample_dir = '/Users/jihye/croptest/face-detection/server/images/test/'+ imgFileName
-  sample_dir = '/Users/jihye/croptest/face-detection/server/images/참외흰가루병_200.jpg' 
+  sample_dir = '/Users/jihye/croptest/face-detection/server/images/test/'+ imgFileName
+  #sample_dir = os.path.join(os.path.abspath("./images"),'딸기흰가루병1.png')
   # predicting images
   img = load_img(sample_dir, target_size=(200, 200))
   x = img_to_array(img)
@@ -50,14 +37,49 @@ def predictCrop(imgFileName):
   # plt.imshow(x/255.)
   x = np.expand_dims(x, axis=0)
   images = np.vstack([x])
-  classes = model7.predict(images, batch_size=10)
-  print(classes[0])
-  if classes[0]<0.5:
-    return "정상"
-  else:
-    return "비정상"
 
+  classes = ""
 
+  if(crop == '딸기'):
+    classes = model1.predict(images, batch_size=10)
+    print(classes[0])
+    if classes[0]<0.6:
+      return "정상"
+    else:
+      return "딸기흰가루병"
+
+  if(crop == '수박'):
+    classes = model2.predict(images, batch_size=10)
+    print(classes[0])
+    if classes[0]<0.6:
+      return "정상"
+    else:
+      return "수박흰가루병"
+  
+    
+  if(crop == '참외'):
+    classes = model3.predict(images, batch_size=10)
+    print(classes[0])
+    if classes[0]<0.6:
+      return "정상"
+    else:
+      return "참외노균병"
+
+  if(crop == '포도'):
+    classes = model5.predict(images, batch_size=10)
+    print(classes[0])
+    if classes[0]<0.6:
+      return "정상"
+    else:
+      return "포도흰가루병"
+
+  if(crop == '고추'):
+    classes = model6.predict(images, batch_size=10)
+    print(classes[0])
+    if classes[0]<0.6:
+      return "정상"
+    else:
+      return "고추마일드모틀바이러스병"      
 
 # disease = []
 # for model in models:
